@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ANEM Base Checklist</title>
+
+<!-- ✅ ICONOS -->
+https://fonts.googleapis.com/icon?family=Material+Icons
+
+<!-- ✅ PDF -->
+https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.jsscript>
+
+<style>
+:root {
+    --bg:#121212;
+    --card:#1e1e1e;
+    --text:white;
+    --main:#c00000;
+}
+body.light { --bg:#f5f5f5; --card:white; --text:#111; }
+
+body {
+    margin:0;
+    font-family:Arial;
+    background:var(--bg);
+    color:var(--text);
+}
+
+header {
+    background:var(--main);
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:15px;
+    padding:15px;
+}
+
+.block {
+    background:var(--card);
+    border-radius:12px;
+    padding:15px;
+}
+
+.block h3 {
+    display:flex;
+    align-items:center;
+}
+
+.block h3 .material-icons {
+    font-size:30px;
+    margin-right:6px;
+}
+
+.item {
+    display:flex;
+    justify-content:space-between;
+    margin:6px 0;
+    cursor:pointer;
+}
+
+.check { font-size:20px; }
+
+#alertBox {
+    text-align:center;
+    padding:10px;
+    font-weight:bold;
+}
+
+button {
+    padding:10px;
+    margin:4px;
+    border:none;
+    border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<span>✈️ ANEM BASE</span>
+<div>
+<button onclick="toggleLang()">🌐</button>
+<button onclick="toggleMode()">🌙</button>
+</div>
+</header>
+
+<div id="setup" style="text-align:center;margin-top:40px;">
+<h2>Selecciona idioma</h2>
+<button onclick="setLang('es')">Español</button>
+<button onclick="setLang('en')">English</button>
+</div>
+
+<div id="app" style="display:none;">
+
+<div id="alertBox"></div>
+
+<div id="grid" class="grid"></div>
+
+<div style="padding:10px;">
+<button onclick="saveOnly()">💾 Guardar</button>
+<button onclick="exportPDF()">📄 PDF</button>
+</div>
+
+</div>
+
+<script>
+const { jsPDF } = window.jspdf;
+
+let lang="es";
+
+const data = {
+ es: [
+  { title:"Trabajo realizado", icon:"engineering",
+    items:["Trabajo identificado","Progreso registrado","Relevos claros"] },
+
+  { title:"Tests", icon:"science",
+    items:["Pendientes identificados","Registrados correctamente"] },
+
+  { title:"Configuración", icon:"settings",
+    items:["Estado seguro","Sin riesgos abiertos"] },
+
+  { title:"Componentes", icon:"build",
+    items:["Identificados","Ubicación correcta"] },
+
+  { title:"Documentación", icon:"description",
+    items:["Actualizada","Coherente"] },
+
+  { title:"Limpieza", icon:"cleaning_services",
+    items:["Zona limpia","Sin residuos"] },
+
+  { title:"FOD", icon:"warning",
+    items:["Zona revisada","Sin objetos extraños"] },
+
+  { title:"Herramientas", icon:"handyman",
+    items:["Recogidas","Contabilizadas","Fuera aeronave","No olvidadas"] },
+
+  { title:"PRL", icon:"health_and_safety",
+    items:["Zona segura","Sin riesgos","Señalización correcta"] }
+ ],
+ en: [
+  { title:"Work done", icon:"engineering",
+    items:["Work identified","Progress recorded","Clear handover"] },
+
+  { title:"Tests", icon:"science",
+    items:["Pending identified","Recorded"] },
+
+  { title:"Configuration", icon:"settings",
+    items:["Safe condition","No risks"] },
+
+  { title:"Components", icon:"build",
+    items:["Identified","Correct location"] },
+
+  { title:"Documentation", icon:"description",
+    items:["Updated","Consistent"] },
+
+  { title:"Cleaning", icon:"cleaning_services",
+    items:["Clean","No waste"] },
+
+  { title:"FOD", icon:"warning",
+    items:["Checked","No objects"] },
+
+  { title:"Tools", icon:"handyman",
+    items:["Collected","Counted","Outside","No missing"] },
+
+  { title:"Safety", icon:"health_and_safety",
+    items:["Safe area","No hazards","Signals OK"] }
+ ]
+};
+
+function setLang(l){
+ lang=l;
+ document.getElementById("setup").style.display="none";
+ document.getElementById("app").style.display="block";
+ render();
+}
+
+function toggleLang(){
+ setLang(lang==="es"?"en":"es");
+}
+
+function render(){
+ let html="";
+
+ data[lang].forEach((block,b)=>{
+  html+=`
+  <div class="block">
+    <h3>
+      <span class="material-icons">${block.icon}</span>
+      ${block.title}
+    </h3>`;
+
+  block.items.forEach((item,i)=>{
+   html+=`
+   <div class="item" onclick="toggle(${b},${i})">
+     <span>${item}</span>
+     <span id="c${b}_${i}" class="check">❌</span>
+   </div>`;
+  });
+
+  html+=`</div>`;
+ });
+
+ document.getElementById("grid").innerHTML=html;
+}
+
+function toggle(b,i){
+ let el=document.getElementById("c"+b+"_"+i);
+ el.innerText = el.innerText==="❌"?"✅":"❌";
+}
+
+function state(){
+ let ok=true;
+ let list=[];
+
+ data[lang].forEach((block,b)=>{
+  block.items.forEach((item,i)=>{
+   let v=document.getElementById("c"+b+"_"+i)?.innerText==="✅";
+   if(!v) ok=false;
+   list.push({text:item,value:v});
+  });
+ });
+
+ return {ok,list};
+}
+
+function saveOnly(){
+ let r=state();
+ alert("Guardado");
+}
+
+function exportPDF(){
+ let r=state();
+ let now=new Date().toLocaleString();
+
+ let d=new jsPDF();
+
+ d.setFillColor(192,0,0);
+ d.rect(0,0,210,20,"F");
+
+ d.setTextColor(255);
+ d.text("ANEM BASE CHECKLIST",10,12);
+
+ d.setTextColor(0);
+ d.text("Fecha: "+now,10,30);
+
+ let y=50;
+ r.list.forEach(c=>{
+  d.text((c.value?"✅ ":"❌ ")+c.text,10,y);
+  y+=7;
+ });
+
+ d.text("Estado: "+(r.ok?"OK":"INCOMPLETO"),10,y+10);
+
+ d.save("ANEM_BASE.pdf");
+}
+
+function toggleMode(){
+ document.body.classList.toggle("light");
+}
+
+setInterval(()=>{
+ if(!document.getElementById("grid")) return;
+
+ let s=state();
+ let box=document.getElementById("alertBox");
+
+ box.style.background=s.ok?"green":"red";
+ box.innerText=s.ok?"✅ LISTO":"❌ INCOMPLETO";
+
+},1500);
+</script>
+
+</body>
+</html>
