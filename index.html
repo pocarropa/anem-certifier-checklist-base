@@ -3,113 +3,478 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANEM BASE · Checklist</title>
 
-<title>ANEM Base Checklist</title>
-
-<!-- ✅ ICONOS -->
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-<!-- ✅ PDF -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
+/* ── TOKENS ─────────────────────────────────────────── */
 :root {
-    --bg:#121212;
-    --card:#1e1e1e;
-    --text:white;
-    --main:#c00000;
+  --bg:        #0d0d0f;
+  --surface:   #141418;
+  --card:      #1a1a20;
+  --border:    #2a2a35;
+  --accent:    #cc0000;
+  --accent2:   #ff3333;
+  --ok:        #00c853;
+  --warn:      #ff6b00;
+  --text:      #e8e8ec;
+  --muted:     #6b6b80;
+  --mono:      'Share Tech Mono', monospace;
+  --heading:   'Barlow Condensed', sans-serif;
+  --body:      'Barlow', sans-serif;
 }
-body.light { --bg:#f5f5f5; --card:white; --text:#111; }
+body.light {
+  --bg:      #f0f0f4;
+  --surface: #e4e4ea;
+  --card:    #ffffff;
+  --border:  #d0d0dc;
+  --text:    #111118;
+  --muted:   #888898;
+}
+
+/* ── RESET ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    margin:0;
-    font-family:Arial;
-    background:var(--bg);
-    color:var(--text);
+  font-family: var(--body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background .3s, color .3s;
 }
 
+/* ── NOISE TEXTURE ───────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── HEADER ──────────────────────────────────────────── */
 header {
-    background:var(--main);
-    padding:15px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  padding: 0 20px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 24px rgba(0,0,0,.5);
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  clip-path: polygon(10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%);
+}
+
+.logo-icon .material-icons-round { font-size: 18px; color: #fff; }
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logo-text strong {
+  font-family: var(--heading);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+
+.logo-text span {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── ICON BUTTON ─────────────────────────────────────── */
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+  font-size: 0;
+}
+.icon-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(204,0,0,.08);
+}
+.icon-btn .material-icons-round { font-size: 18px; }
+
+/* ── STATUS BAR ──────────────────────────────────────── */
+#statusBar {
+  margin: 16px 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+}
+
+.status-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--surface);
+  gap: 16px;
+}
+
+.status-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.status-text {
+  font-family: var(--heading);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: color .4s;
+}
+
+.status-progress {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.progress-bar-wrap {
+  height: 3px;
+  background: var(--border);
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width .5s cubic-bezier(.4,0,.2,1), background .5s;
+}
+
+/* ── GRID ────────────────────────────────────────────── */
 .grid {
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:15px;
-    padding:15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  padding: 0 20px 20px;
+  position: relative;
+  z-index: 1;
 }
 
+/* ── CARD ────────────────────────────────────────────── */
 .block {
-    background:var(--card);
-    border-radius:12px;
-    padding:15px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color .3s, box-shadow .3s;
+  animation: fadeUp .4s ease both;
 }
 
-.block h3 {
-    display:flex;
-    align-items:center;
+.block:hover {
+  border-color: rgba(204,0,0,.35);
+  box-shadow: 0 0 0 1px rgba(204,0,0,.1), 0 8px 32px rgba(0,0,0,.3);
 }
 
-.block h3 .material-icons {
-    font-size:32px;
-    margin-right:8px;
-    color:#c00000;
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(14px); }
+  to   { opacity:1; transform: translateY(0); }
 }
 
+.block-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.block-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(204,0,0,.12);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.block-icon .material-icons-round { font-size: 20px; color: var(--accent); }
+
+.block-title {
+  font-family: var(--heading);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.block-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.block-items {
+  padding: 6px 0;
+}
+
+/* ── ITEM ROW ────────────────────────────────────────── */
 .item {
-    display:flex;
-    justify-content:space-between;
-    margin:6px 0;
-    cursor:pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: background .15s;
+  border-bottom: 1px solid rgba(255,255,255,.03);
+  user-select: none;
 }
 
-.check { font-size:20px; }
+.item:last-child { border-bottom: none; }
 
-#alertBox {
-    text-align:center;
-    padding:10px;
-    font-weight:bold;
+.item:hover { background: rgba(255,255,255,.04); }
+.item:active { background: rgba(204,0,0,.07); }
+
+.item-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all .2s cubic-bezier(.4,0,.2,1);
+  position: relative;
+  overflow: hidden;
 }
 
-button {
-    padding:10px;
-    margin:5px;
-    border:none;
-    border-radius:8px;
+.item-check .material-icons-round {
+  font-size: 13px;
+  color: #fff;
+  opacity: 0;
+  transform: scale(.4);
+  transition: all .2s cubic-bezier(.4,0,.2,1);
 }
+
+.item.checked .item-check {
+  background: var(--ok);
+  border-color: var(--ok);
+  box-shadow: 0 0 10px rgba(0,200,83,.3);
+}
+
+.item.checked .item-check .material-icons-round {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.item-label {
+  font-size: 13.5px;
+  flex: 1;
+  color: var(--text);
+  transition: opacity .2s;
+}
+
+.item.checked .item-label {
+  opacity: .5;
+  text-decoration: line-through;
+  text-decoration-color: var(--ok);
+}
+
+/* ── BLOCK COMPLETE INDICATOR ───────────────────────── */
+.block.all-done .block-header {
+  border-bottom-color: rgba(0,200,83,.2);
+}
+.block.all-done .block-icon {
+  background: rgba(0,200,83,.12);
+}
+.block.all-done .block-icon .material-icons-round { color: var(--ok); }
+.block.all-done .block-title { color: var(--ok); }
+
+/* ── BOTTOM ACTIONS ──────────────────────────────────── */
+.actions {
+  display: flex;
+  gap: 10px;
+  padding: 6px 20px 28px;
+  position: relative;
+  z-index: 1;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--text);
+  font-family: var(--heading);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(204,0,0,.07);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--accent2);
+  border-color: var(--accent2);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(204,0,0,.4);
+}
+
+.btn .material-icons-round { font-size: 16px; }
+
+/* ── TIMESTAMP ────────────────────────────────────────── */
+#timestamp {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  padding: 0 20px 8px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── LIGHT MODE ADJUSTMENTS ──────────────────────────── */
+body.light .item:hover { background: rgba(0,0,0,.04); }
+body.light::before { opacity: 0; }
+
+/* ── ANIMATION STAGGER ────────────────────────────────── */
+.block:nth-child(1)  { animation-delay: .05s }
+.block:nth-child(2)  { animation-delay: .10s }
+.block:nth-child(3)  { animation-delay: .15s }
+.block:nth-child(4)  { animation-delay: .20s }
+.block:nth-child(5)  { animation-delay: .25s }
+.block:nth-child(6)  { animation-delay: .30s }
+.block:nth-child(7)  { animation-delay: .35s }
+.block:nth-child(8)  { animation-delay: .40s }
+.block:nth-child(9)  { animation-delay: .45s }
+
+/* ── PULSE on complete ─────────────────────────────────── */
+@keyframes completePulse {
+  0%   { box-shadow: 0 0 0 0 rgba(0,200,83,.4); }
+  70%  { box-shadow: 0 0 0 12px rgba(0,200,83,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,200,83,0); }
+}
+.block.just-done { animation: completePulse .6s ease; }
 </style>
 </head>
 
 <body>
 
+<!-- HEADER -->
 <header>
-<span>✈️ ANEM BASE</span>
-<div>
-<button onclick="toggleLang()">🌐</button>
-<button onclick="toggleMode()">🌙</button>
-</div>
+  <div class="logo">
+    <div class="logo-icon"><span class="material-icons-round">flight</span></div>
+    <div class="logo-text">
+      <strong>ANEM BASE</strong>
+      <span>End-of-shift checklist</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" onclick="toggleLang()" title="Toggle language">
+      <span class="material-icons-round">translate</span>
+    </button>
+    <button class="icon-btn" onclick="toggleMode()" title="Toggle theme">
+      <span class="material-icons-round" id="modeIcon">light_mode</span>
+    </button>
+  </div>
 </header>
 
-<div id="setup" style="text-align:center;margin-top:40px;">
-<h2>Idioma / Language</h2>
-<button onclick="setLang('es')">Español</button>
-<button onclick="setLang('en')">English</button>
-</div>
+<!-- APP -->
+<div id="app">
 
-<div id="app" style="display:none;">
+  <!-- STATUS BAR -->
+  <div id="statusBar">
+    <div class="status-inner">
+      <div>
+        <div class="status-label">Estado del turno</div>
+        <div class="status-text" id="statusText">— CARGANDO —</div>
+      </div>
+      <div style="text-align:right">
+        <div class="status-progress" id="statusProgress">0 / 0</div>
+      </div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
 
-<div id="alertBox"></div>
+  <div id="timestamp"></div>
 
-<div id="grid" class="grid"></div>
+  <!-- GRID -->
+  <div id="grid" class="grid"></div>
 
-<div style="padding:10px;">
-<button onclick="resetChecklist()">🧹 Reset</button>
-<button onclick="exportPDF()">📄 PDF</button>
-</div>
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn" onclick="resetChecklist()">
+      <span class="material-icons-round">restart_alt</span>
+      Reset
+    </button>
+    <button class="btn btn-primary" onclick="exportPDF()">
+      <span class="material-icons-round">picture_as_pdf</span>
+      Exportar PDF
+    </button>
+  </div>
 
 </div>
 
@@ -118,7 +483,7 @@ const { jsPDF } = window.jspdf;
 
 let lang = localStorage.getItem("lang") || "es";
 
-/* ✅ DATA */
+/* DATA */
 const data = {
  es: [
   {title:"Trabajo realizado",icon:"engineering",items:["Trabajo identificado","Progreso registrado","Relevos claros"]},
@@ -144,129 +509,181 @@ const data = {
  ]
 };
 
-/* ✅ ARRANQUE */
-window.onload = () => {
- render();
+/* TIMESTAMP */
+function updateTimestamp() {
+  const el = document.getElementById("timestamp");
+  const now = new Date();
+  el.textContent = now.toLocaleString(lang === 'es' ? 'es-ES' : 'en-GB', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  }).toUpperCase();
+}
+setInterval(updateTimestamp, 1000);
 
- document.getElementById("setup").style.display="none";
- document.getElementById("app").style.display="block";
+/* BOOT */
+window.onload = () => {
+  render();
+  updateStatus();
+  updateTimestamp();
 };
 
-/* ✅ IDIOMA */
-function setLang(l){
- lang=l;
- localStorage.setItem("lang", l);
- render();
-}
+/* LANG */
+function setLang(l){ lang=l; localStorage.setItem("lang",l); render(); updateStatus(); }
+function toggleLang(){ setLang(lang==="es"?"en":"es"); }
 
-function toggleLang(){
- lang = (lang==="es") ? "en" : "es";
- localStorage.setItem("lang", lang);
- render();
-}
-
-/* ✅ RENDER */
+/* RENDER */
 function render(){
- let html="";
- let saved = JSON.parse(localStorage.getItem("checklist")) || {};
+  let saved = JSON.parse(localStorage.getItem("checklist")) || {};
+  let html = "";
 
- data[lang].forEach((block,b)=>{
-  html+=`
-  <div class="block">
-    <h3><span class="material-icons">${block.icon}</span>${block.title}</h3>`;
+  data[lang].forEach((block, b) => {
+    const total = block.items.length;
+    const done  = block.items.filter((_,i) => saved[b+"_"+i]).length;
+    const allDone = done === total;
 
-  block.items.forEach((item,i)=>{
-   let key = b+"_"+i;
-   let checked = saved[key] ? "✅" : "❌";
+    html += `
+    <div class="block${allDone ? ' all-done' : ''}" id="block${b}">
+      <div class="block-header">
+        <div class="block-icon"><span class="material-icons-round">${block.icon}</span></div>
+        <div class="block-title">${block.title}</div>
+        <div class="block-count">${done}/${total}</div>
+      </div>
+      <div class="block-items">`;
 
-   html+=`
-   <div class="item" onclick="toggle(${b},${i})">
-     <span>${item}</span>
-     <span id="c${b}_${i}">${checked}</span>
-   </div>`;
+    block.items.forEach((item, i) => {
+      const key = b+"_"+i;
+      const checked = !!saved[key];
+      html += `
+        <div class="item${checked?' checked':''}" id="item${b}_${i}" onclick="toggle(${b},${i})">
+          <div class="item-check"><span class="material-icons-round">check</span></div>
+          <div class="item-label">${item}</div>
+        </div>`;
+    });
+
+    html += `</div></div>`;
   });
 
-  html+=`</div>`;
- });
-
- document.getElementById("grid").innerHTML=html;
+  document.getElementById("grid").innerHTML = html;
 }
 
-/* ✅ TOGGLE + AUTOGUARDADO */
-function toggle(b,i){
- let el=document.getElementById(`c${b}_${i}`);
- let newValue = el.innerText==="❌";
- el.innerText = newValue ? "✅" : "❌";
+/* TOGGLE — no re-render, DOM patch */
+function toggle(b, i){
+  let saved = JSON.parse(localStorage.getItem("checklist")) || {};
+  const key = b+"_"+i;
+  saved[key] = !saved[key];
+  localStorage.setItem("checklist", JSON.stringify(saved));
 
- saveState(b,i,newValue);
+  const itemEl = document.getElementById(`item${b}_${i}`);
+  itemEl.classList.toggle("checked", saved[key]);
+
+  // Update block header count
+  const block = data[lang][b];
+  const total = block.items.length;
+  const done  = block.items.filter((_,j) => saved[b+"_"+j]).length;
+  const blockEl = document.getElementById("block"+b);
+  blockEl.querySelector(".block-count").textContent = done+"/"+total;
+
+  const allDone = done === total;
+  const wasDone = blockEl.classList.contains("all-done");
+  blockEl.classList.toggle("all-done", allDone);
+  if (allDone && !wasDone) {
+    blockEl.classList.add("just-done");
+    setTimeout(() => blockEl.classList.remove("just-done"), 700);
+  }
+
+  updateStatus();
 }
 
-/* ✅ GUARDADO AUTOMÁTICO */
-function saveState(b,i,value){
- let saved = JSON.parse(localStorage.getItem("checklist")) || {};
- saved[b+"_"+i] = value;
- localStorage.setItem("checklist", JSON.stringify(saved));
-}
+/* STATUS */
+function updateStatus(){
+  let saved = JSON.parse(localStorage.getItem("checklist")) || {};
+  let total = 0, done = 0;
 
-/* ✅ ESTADO */
-function state(){
- let ok=true;
- data[lang].forEach((block,b)=>{
-  block.items.forEach((item,i)=>{
-   let v=document.getElementById(`c${b}_${i}`).innerText==="✅";
-   if(!v) ok=false;
+  data[lang].forEach((block,b) => {
+    block.items.forEach((_,i) => {
+      total++;
+      if(saved[b+"_"+i]) done++;
+    });
   });
- });
- return ok;
+
+  const pct = total ? Math.round(done/total*100) : 0;
+  const ok  = done === total;
+
+  const statusText = document.getElementById("statusText");
+  const progressFill = document.getElementById("progressFill");
+  const statusLabel = document.querySelector(".status-label");
+
+  document.getElementById("statusProgress").textContent = `${done} / ${total}`;
+
+  if(ok){
+    statusText.textContent = lang==="es" ? "✓  LISTO PARA CONTINUAR" : "✓  READY TO PROCEED";
+    statusText.style.color = "var(--ok)";
+    progressFill.style.background = "var(--ok)";
+    statusLabel.textContent = lang==="es" ? "Estado del turno" : "Shift status";
+  } else {
+    statusText.textContent = lang==="es"
+      ? `${pct}%  INCOMPLETO`
+      : `${pct}%  INCOMPLETE`;
+    statusText.style.color = pct > 60 ? "var(--warn)" : "var(--accent)";
+    progressFill.style.background = pct > 60 ? "var(--warn)" : "var(--accent)";
+    statusLabel.textContent = lang==="es" ? "Estado del turno" : "Shift status";
+  }
+
+  progressFill.style.width = pct+"%";
 }
 
-/* ✅ RESET */
+/* RESET */
 function resetChecklist(){
- localStorage.removeItem("checklist");
- render();
+  if(!confirm(lang==="es"?"¿Reiniciar checklist?":"Reset checklist?")) return;
+  localStorage.removeItem("checklist");
+  render();
+  updateStatus();
 }
 
-/* ✅ PDF */
+/* PDF */
 function exportPDF(){
- let now=new Date().toLocaleString();
- let d=new jsPDF();
+  const now = new Date().toLocaleString();
+  const d = new jsPDF();
+  const saved = JSON.parse(localStorage.getItem("checklist")) || {};
 
- d.text("ANEM BASE CHECKLIST",10,10);
- d.text(now,10,20);
+  d.setFont("helvetica","bold");
+  d.setFontSize(16);
+  d.text("ANEM BASE CHECKLIST", 14, 16);
+  d.setFont("helvetica","normal");
+  d.setFontSize(9);
+  d.text(now, 14, 23);
+  d.setDrawColor(200,0,0);
+  d.setLineWidth(0.5);
+  d.line(14, 26, 196, 26);
 
- let y=30;
-
- data[lang].forEach((block,b)=>{
-  d.text(block.title,10,y);
-  y+=6;
-
-  block.items.forEach((item,i)=>{
-   let val=document.getElementById(`c${b}_${i}`).innerText;
-   d.text(val+" "+item,12,y);
-   y+=6;
+  let y = 34;
+  data[lang].forEach((block,b) => {
+    d.setFont("helvetica","bold");
+    d.setFontSize(11);
+    d.text(block.title.toUpperCase(), 14, y);
+    y += 6;
+    block.items.forEach((item,i) => {
+      const val = saved[b+"_"+i] ? "✓" : "✗";
+      d.setFont("helvetica","normal");
+      d.setFontSize(10);
+      d.setTextColor(saved[b+"_"+i] ? 0 : 180, saved[b+"_"+i] ? 150 : 0, 0);
+      d.text(val+" "+item, 18, y);
+      d.setTextColor(0);
+      y += 6;
+    });
+    y += 3;
+    if(y > 270){ d.addPage(); y = 20; }
   });
 
-  y+=4;
- });
-
- d.save("ANEM_BASE.pdf");
+  d.save("ANEM_BASE_"+new Date().toISOString().slice(0,10)+".pdf");
 }
 
-/* ✅ MODO */
+/* THEME */
 function toggleMode(){
- document.body.classList.toggle("light");
+  document.body.classList.toggle("light");
+  document.getElementById("modeIcon").textContent =
+    document.body.classList.contains("light") ? "dark_mode" : "light_mode";
 }
-
-/* ✅ ALERTA */
-setInterval(()=>{
- let box=document.getElementById("alertBox");
- if(!box) return;
-
- let ok = state();
-
- box.style.background=ok?"green":"red";
- box.innerText=ok?"✅ LISTO PARA CONTINUAR":"❌ INCOMPLETO";
-},1500);
 </script>
 
 </body>
