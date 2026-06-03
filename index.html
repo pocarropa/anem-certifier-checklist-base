@@ -6,10 +6,10 @@
 
 <title>ANEM Base Checklist</title>
 
-<!-- ✅ ICONOS CORRECTO -->
+<!-- ✅ ICONOS -->
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-<!-- ✅ JSPDF CORRECTO -->
+<!-- ✅ PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -80,7 +80,6 @@ button {
     margin:5px;
     border:none;
     border-radius:8px;
-    font-size:14px;
 }
 </style>
 </head>
@@ -88,7 +87,7 @@ button {
 <body>
 
 <header>
-<span>✈️ ANEM END SHIFT CHECKLIST FOR BASE CERTIFIERS</span>
+<span>✈️ ANEM BASE</span>
 <div>
 <button onclick="toggleLang()">🌐</button>
 <button onclick="toggleMode()">🌙</button>
@@ -108,7 +107,7 @@ button {
 <div id="grid" class="grid"></div>
 
 <div style="padding:10px;">
-<button onclick="saveOnly()">💾 Guardar</button>
+<button onclick="resetChecklist()">🧹 Reset</button>
 <button onclick="exportPDF()">📄 PDF</button>
 </div>
 
@@ -117,9 +116,9 @@ button {
 <script>
 const { jsPDF } = window.jspdf;
 
-let lang="es";
+let lang = localStorage.getItem("lang") || "es";
 
-/* ✅ BLOQUES REALES */
+/* ✅ DATA */
 const data = {
  es: [
   {title:"Trabajo realizado",icon:"engineering",items:["Trabajo identificado","Progreso registrado","Relevos claros"]},
@@ -130,12 +129,12 @@ const data = {
   {title:"Limpieza",icon:"cleaning_services",items:["Zona limpia","Sin residuos"]},
   {title:"FOD",icon:"warning",items:["Zona revisada","Sin objetos extraños"]},
   {title:"Herramientas",icon:"handyman",items:["Recogidas","Contabilizadas","Fuera aeronave","No olvidadas"]},
-  {title:"PRL",icon:"health_and_safety",items:["Zona segura","Sin riesgos","Señalización correcta"]}
+  {title:"PRL",icon:"health_and_safety",items:["Zona segura","Sin riesgos","Señalización"]}
  ],
  en: [
   {title:"Work done",icon:"engineering",items:["Work identified","Progress recorded","Clear handover"]},
   {title:"Tests",icon:"science",items:["Pending identified","Recorded"]},
-  {title:"Configuration",icon:"settings",items:["Safe condition","No risks"]},
+  {title:"Configuration",icon:"settings",items:["Safe","No risks"]},
   {title:"Components",icon:"build",items:["Identified","Correct location"]},
   {title:"Documentation",icon:"description",items:["Updated","Consistent"]},
   {title:"Cleaning",icon:"cleaning_services",items:["Clean","No waste"]},
@@ -145,34 +144,45 @@ const data = {
  ]
 };
 
+/* ✅ ARRANQUE */
+window.onload = () => {
+ render();
+
+ document.getElementById("setup").style.display="none";
+ document.getElementById("app").style.display="block";
+};
+
 /* ✅ IDIOMA */
 function setLang(l){
  lang=l;
- document.getElementById("setup").style.display="none";
- document.getElementById("app").style.display="block";
+ localStorage.setItem("lang", l);
  render();
 }
 
 function toggleLang(){
- setLang(lang==="es"?"en":"es");
+ lang = (lang==="es") ? "en" : "es";
+ localStorage.setItem("lang", lang);
+ render();
 }
 
 /* ✅ RENDER */
 function render(){
  let html="";
+ let saved = JSON.parse(localStorage.getItem("checklist")) || {};
+
  data[lang].forEach((block,b)=>{
   html+=`
   <div class="block">
-    <h3>
-      <span class="material-icons">${block.icon}</span>
-      ${block.title}
-    </h3>`;
+    <h3><span class="material-icons">${block.icon}</span>${block.title}</h3>`;
 
   block.items.forEach((item,i)=>{
+   let key = b+"_"+i;
+   let checked = saved[key] ? "✅" : "❌";
+
    html+=`
    <div class="item" onclick="toggle(${b},${i})">
      <span>${item}</span>
-     <span id="c${b}_${i}" class="check">❌</span>
+     <span id="c${b}_${i}">${checked}</span>
    </div>`;
   });
 
@@ -182,56 +192,62 @@ function render(){
  document.getElementById("grid").innerHTML=html;
 }
 
-/* ✅ TOGGLE */
+/* ✅ TOGGLE + AUTOGUARDADO */
 function toggle(b,i){
- let el=document.getElementById("c"+b+"_"+i);
- el.innerText = el.innerText==="❌"?"✅":"❌";
+ let el=document.getElementById(`c${b}_${i}`);
+ let newValue = el.innerText==="❌";
+ el.innerText = newValue ? "✅" : "❌";
+
+ saveState(b,i,newValue);
+}
+
+/* ✅ GUARDADO AUTOMÁTICO */
+function saveState(b,i,value){
+ let saved = JSON.parse(localStorage.getItem("checklist")) || {};
+ saved[b+"_"+i] = value;
+ localStorage.setItem("checklist", JSON.stringify(saved));
 }
 
 /* ✅ ESTADO */
 function state(){
  let ok=true;
- let list=[];
-
  data[lang].forEach((block,b)=>{
   block.items.forEach((item,i)=>{
-   let v=document.getElementById("c"+b+"_"+i)?.innerText==="✅";
+   let v=document.getElementById(`c${b}_${i}`).innerText==="✅";
    if(!v) ok=false;
-   list.push({text:item,value:v});
   });
  });
-
- return {ok,list};
+ return ok;
 }
 
-/* ✅ GUARDAR */
-function saveOnly(){
- alert("✔ Guardado");
+/* ✅ RESET */
+function resetChecklist(){
+ localStorage.removeItem("checklist");
+ render();
 }
 
 /* ✅ PDF */
 function exportPDF(){
- let r=state();
  let now=new Date().toLocaleString();
-
  let d=new jsPDF();
 
- d.setFillColor(192,0,0);
- d.rect(0,0,210,20,"F");
+ d.text("ANEM BASE CHECKLIST",10,10);
+ d.text(now,10,20);
 
- d.setTextColor(255);
- d.text("ANEM BASE CHECKLIST",10,12);
+ let y=30;
 
- d.setTextColor(0);
- d.text("Fecha: "+now,10,30);
+ data[lang].forEach((block,b)=>{
+  d.text(block.title,10,y);
+  y+=6;
 
- let y=50;
- r.list.forEach(c=>{
-  d.text((c.value?"✅ ":"❌ ")+c.text,10,y);
-  y+=7;
+  block.items.forEach((item,i)=>{
+   let val=document.getElementById(`c${b}_${i}`).innerText;
+   d.text(val+" "+item,12,y);
+   y+=6;
+  });
+
+  y+=4;
  });
-
- d.text("Estado: "+(r.ok?"OK":"INCOMPLETO"),10,y+10);
 
  d.save("ANEM_BASE.pdf");
 }
@@ -241,16 +257,15 @@ function toggleMode(){
  document.body.classList.toggle("light");
 }
 
-/* ✅ ALERTA EN TIEMPO REAL */
+/* ✅ ALERTA */
 setInterval(()=>{
- if(!document.getElementById("grid")) return;
-
- let s=state();
  let box=document.getElementById("alertBox");
+ if(!box) return;
 
- box.style.background=s.ok?"green":"red";
- box.innerText=s.ok?"✅ LISTO":"❌ INCOMPLETO";
+ let ok = state();
 
+ box.style.background=ok?"green":"red";
+ box.innerText=ok?"✅ LISTO PARA CONTINUAR":"❌ INCOMPLETO";
 },1500);
 </script>
 
