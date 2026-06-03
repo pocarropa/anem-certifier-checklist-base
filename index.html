@@ -6,11 +6,11 @@
 
 <title>ANEM Base Checklist</title>
 
-<!-- ✅ ICONOS -->
-https://fonts.googleapis.com/icon?family=Material+Icons
+<!-- ✅ ICONOS CORRECTO -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-<!-- ✅ PDF -->
-https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.jsscript>
+<!-- ✅ JSPDF CORRECTO -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 :root {
@@ -55,8 +55,9 @@ header {
 }
 
 .block h3 .material-icons {
-    font-size:30px;
-    margin-right:6px;
+    font-size:32px;
+    margin-right:8px;
+    color:#c00000;
 }
 
 .item {
@@ -76,9 +77,10 @@ header {
 
 button {
     padding:10px;
-    margin:4px;
+    margin:5px;
     border:none;
     border-radius:8px;
+    font-size:14px;
 }
 </style>
 </head>
@@ -94,7 +96,7 @@ button {
 </header>
 
 <div id="setup" style="text-align:center;margin-top:40px;">
-<h2>Selecciona idioma</h2>
+<h2>Idioma / Language</h2>
 <button onclick="setLang('es')">Español</button>
 <button onclick="setLang('en')">English</button>
 </div>
@@ -117,65 +119,33 @@ const { jsPDF } = window.jspdf;
 
 let lang="es";
 
+/* ✅ BLOQUES REALES */
 const data = {
  es: [
-  { title:"Trabajo realizado", icon:"engineering",
-    items:["Trabajo identificado","Progreso registrado","Relevos claros"] },
-
-  { title:"Tests", icon:"science",
-    items:["Pendientes identificados","Registrados correctamente"] },
-
-  { title:"Configuración", icon:"settings",
-    items:["Estado seguro","Sin riesgos abiertos"] },
-
-  { title:"Componentes", icon:"build",
-    items:["Identificados","Ubicación correcta"] },
-
-  { title:"Documentación", icon:"description",
-    items:["Actualizada","Coherente"] },
-
-  { title:"Limpieza", icon:"cleaning_services",
-    items:["Zona limpia","Sin residuos"] },
-
-  { title:"FOD", icon:"warning",
-    items:["Zona revisada","Sin objetos extraños"] },
-
-  { title:"Herramientas", icon:"handyman",
-    items:["Recogidas","Contabilizadas","Fuera aeronave","No olvidadas"] },
-
-  { title:"PRL", icon:"health_and_safety",
-    items:["Zona segura","Sin riesgos","Señalización correcta"] }
+  {title:"Trabajo realizado",icon:"engineering",items:["Trabajo identificado","Progreso registrado","Relevos claros"]},
+  {title:"Tests",icon:"science",items:["Pendientes identificados","Registrados correctamente"]},
+  {title:"Configuración",icon:"settings",items:["Estado seguro","Sin riesgos abiertos"]},
+  {title:"Componentes",icon:"build",items:["Identificados","Ubicación correcta"]},
+  {title:"Documentación",icon:"description",items:["Actualizada","Coherente"]},
+  {title:"Limpieza",icon:"cleaning_services",items:["Zona limpia","Sin residuos"]},
+  {title:"FOD",icon:"warning",items:["Zona revisada","Sin objetos extraños"]},
+  {title:"Herramientas",icon:"handyman",items:["Recogidas","Contabilizadas","Fuera aeronave","No olvidadas"]},
+  {title:"PRL",icon:"health_and_safety",items:["Zona segura","Sin riesgos","Señalización correcta"]}
  ],
  en: [
-  { title:"Work done", icon:"engineering",
-    items:["Work identified","Progress recorded","Clear handover"] },
-
-  { title:"Tests", icon:"science",
-    items:["Pending identified","Recorded"] },
-
-  { title:"Configuration", icon:"settings",
-    items:["Safe condition","No risks"] },
-
-  { title:"Components", icon:"build",
-    items:["Identified","Correct location"] },
-
-  { title:"Documentation", icon:"description",
-    items:["Updated","Consistent"] },
-
-  { title:"Cleaning", icon:"cleaning_services",
-    items:["Clean","No waste"] },
-
-  { title:"FOD", icon:"warning",
-    items:["Checked","No objects"] },
-
-  { title:"Tools", icon:"handyman",
-    items:["Collected","Counted","Outside","No missing"] },
-
-  { title:"Safety", icon:"health_and_safety",
-    items:["Safe area","No hazards","Signals OK"] }
+  {title:"Work done",icon:"engineering",items:["Work identified","Progress recorded","Clear handover"]},
+  {title:"Tests",icon:"science",items:["Pending identified","Recorded"]},
+  {title:"Configuration",icon:"settings",items:["Safe condition","No risks"]},
+  {title:"Components",icon:"build",items:["Identified","Correct location"]},
+  {title:"Documentation",icon:"description",items:["Updated","Consistent"]},
+  {title:"Cleaning",icon:"cleaning_services",items:["Clean","No waste"]},
+  {title:"FOD",icon:"warning",items:["Checked","No objects"]},
+  {title:"Tools",icon:"handyman",items:["Collected","Counted","Outside","No missing"]},
+  {title:"Safety",icon:"health_and_safety",items:["Safe area","No hazards","Signals"]}
  ]
 };
 
+/* ✅ IDIOMA */
 function setLang(l){
  lang=l;
  document.getElementById("setup").style.display="none";
@@ -187,9 +157,9 @@ function toggleLang(){
  setLang(lang==="es"?"en":"es");
 }
 
+/* ✅ RENDER */
 function render(){
  let html="";
-
  data[lang].forEach((block,b)=>{
   html+=`
   <div class="block">
@@ -212,11 +182,13 @@ function render(){
  document.getElementById("grid").innerHTML=html;
 }
 
+/* ✅ TOGGLE */
 function toggle(b,i){
  let el=document.getElementById("c"+b+"_"+i);
  el.innerText = el.innerText==="❌"?"✅":"❌";
 }
 
+/* ✅ ESTADO */
 function state(){
  let ok=true;
  let list=[];
@@ -232,11 +204,12 @@ function state(){
  return {ok,list};
 }
 
+/* ✅ GUARDAR */
 function saveOnly(){
- let r=state();
- alert("Guardado");
+ alert("✔ Guardado");
 }
 
+/* ✅ PDF */
 function exportPDF(){
  let r=state();
  let now=new Date().toLocaleString();
@@ -263,10 +236,12 @@ function exportPDF(){
  d.save("ANEM_BASE.pdf");
 }
 
+/* ✅ MODO */
 function toggleMode(){
  document.body.classList.toggle("light");
 }
 
+/* ✅ ALERTA EN TIEMPO REAL */
 setInterval(()=>{
  if(!document.getElementById("grid")) return;
 
